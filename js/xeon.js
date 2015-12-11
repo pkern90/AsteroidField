@@ -1,10 +1,10 @@
 var Xeon = function () {
     THREE.Object3D.call(this);
-    this.add(createXeonObject());
+    createXeonObject(this);
     //public
 
     //internal
-    function createXeonObject() {
+    function createXeonObject(object) {
         var material = new THREE.MeshPhongMaterial({
             color: 0xff9900,
             specular: 0x0000ff,
@@ -17,9 +17,9 @@ var Xeon = function () {
 
         var geometry = new THREE.TorusKnotGeometry(10, 4, 20, 4);
         geometry.scale(0.3, 0.3, 0.3)
-        var xeonObject = new THREE.Mesh(geometry, material);
+        var xeonMesh = new THREE.Mesh(geometry, material);
 
-        return xeonObject;
+        object.add(xeonMesh);
     }
 };
 

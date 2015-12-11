@@ -95,6 +95,10 @@ THREE.SpaceController = function (object) {
 
     this.update = function (delta) {
 
+        if (!this.object.alive) {
+            return;
+        }
+
         var moveMult = delta * this.movementSpeed * this.movementSpeedMultiplier;
         var rotMult = delta * this.rollSpeed * this.movementSpeedMultiplier;
 

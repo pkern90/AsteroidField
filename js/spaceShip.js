@@ -1,10 +1,16 @@
 var SpaceShip = function () {
     THREE.Object3D.call(this);
-    this.add(createSpaceShipObject());
+
     //public
+    this.alive = true;
+    this.colliders = [];
+
+    //init
+    createSpaceShipObject(this);
+    createCollider(this);
 
     //internal
-    function createSpaceShipObject() {
+    function createSpaceShipObject(object) {
         var material = new THREE.MeshPhongMaterial({
             color: 0xFFFFFF,
             specular: 0x6666ff,
@@ -53,16 +59,86 @@ var SpaceShip = function () {
         rThruster.translateY(.8);
         rThruster.translateZ(3);
 
-        //ship
-        var ship = new THREE.Object3D();
-        ship.add(wings);
-        ship.add(body);
-        ship.add(lThruster);
-        ship.add(rThruster);
+        object.add(wings);
+        object.add(body);
+        object.add(lThruster);
+        object.add(rThruster);
+    }
 
-        return ship;
+    function createCollider(object) {
+        //collision box
+        var material = new THREE.MeshPhongMaterial({
+            wireframe: true,
+            transparent: true,
+            opacity: 0
+        });
+        var geometry = new THREE.BoxGeometry(26, 4, 8);
+        var collisionBox = new THREE.Mesh(geometry, material);
+
+        object.add(collisionBox);
+        object.colliders.push(collisionBox);
     }
 };
 
 SpaceShip.prototype = Object.create(THREE.Object3D.prototype);
 SpaceShip.prototype.constructor = SpaceShip;
+
+SpaceShip.prototype.update = function (collidableObjectList, delta) {
+
+    if (this.alive) {
+        detectCollision(this);
+    }
+    else {
+        explode(this);
+    }
+
+    function detectCollision(object) {
+        var collidableMeshList = [];
+        for (var meshIndex = 0; meshIndex < collidableObjectList.length; meshIndex++) {
+            collidableMeshList[meshIndex] = collidableObjectList[meshIndex].children[0];
+        }
+
+        for (var colliderIndex = 0; colliderIndex < object.colliders.length; colliderIndex++) {
+            var collider = object.colliders[0];
+
+            for (var vertexIndex = 0; vertexIndex < collider.geometry.vertices.length; vertexIndex++) {
+                var localVertex = collider.geometry.vertices[vertexIndex].clone();
+                var globalVertex = localVertex.applyMatrix4(collider.matrixWorld);
+                var directionVector = globalVertex.sub(collider.position);
+
+                var ray = new THREE.Raycaster(collider.position, directionVector.clone().normalize());
+                var collisionResults = ray.intersectObjects(collidableMeshList);
+                if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+                    object.alive = false;
+                    return;
+                }
+            }
+        }
+    }
+
+    function explode(object) {
+        var movementSpeed = 20.00;
+        var rotationSpeed = 100 * Math.PI / 180;
+
+        for (var meshIndex = 0; meshIndex < object.children.length; meshIndex++) {
+            var mesh = object.children[meshIndex];
+
+            if (!mesh.explodingDirection) {
+                mesh.explodingDirection = new THREE.Vector3(
+                    Math.round(Math.random()),
+                    Math.round(Math.random()),
+                    Math.round(Math.random()));
+            }
+
+
+            var explotionVector = mesh.explodingDirection.clone().multiplyScalar (movementSpeed * delta);
+            mesh.translateX(explotionVector.x);
+            mesh.translateY(explotionVector.y);
+            mesh.translateZ(explotionVector.z);
+
+            mesh.rotation.x += rotationSpeed * delta;
+            mesh.rotation.z += rotationSpeed * delta;
+            mesh.rotation.y += rotationSpeed * delta;
+        }
+    }
+}

@@ -1,11 +1,11 @@
 var Meteor = function (radius, type) {
     THREE.Object3D.call(this);
-    this.add(createMeteorMesh(radius));
+    createMeteorMesh(this);
     //public
 
 
     //internal
-    function createMeteorMesh() {
+    function createMeteorMesh(object) {
         var material = new THREE.MeshPhongMaterial({
             color: 0x663333,
             specular: 0xbb3355,
@@ -31,7 +31,7 @@ var Meteor = function (radius, type) {
 
         var meteorMesh = new THREE.Mesh(geometry, material);
 
-        return meteorMesh;
+        object.add(meteorMesh);
     }
 };
 

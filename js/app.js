@@ -104,22 +104,23 @@
     function render() {
         var delta = clock.getDelta();
 
-        updateMeteors(delta);
-        controller.update(delta);
-
-        camera.position.x = spaceShip.position.x;
-        camera.position.y = spaceShip.position.y + 10;
-        camera.position.z = spaceShip.position.z + 50;
-
-        camera.lookAt(spaceShip.position);
-
-        if (fixedUpdateTrigger + delta > 1) {
+        if (fixedUpdateTrigger + delta > 0.5) {
             fixedUpdateTrigger = fixedUpdateTrigger + delta - 1;
             fixedUpdate();
         }
         else {
             fixedUpdateTrigger += delta;
         }
+
+        updateMeteors(delta);
+        controller.update(delta);
+        spaceShip.update(meteors, delta);
+
+        camera.position.x = spaceShip.position.x;
+        camera.position.y = spaceShip.position.y + 10;
+        camera.position.z = spaceShip.position.z + 50;
+
+        camera.lookAt(spaceShip.position);
 
         xeon.update(delta);
 
