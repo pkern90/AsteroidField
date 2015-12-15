@@ -32,6 +32,7 @@ THREE.SpaceController = function (object) {
             case 87: /*W*/
                 this.moveState.pitchDown = 1;
                 break;
+
             case 83: /*S*/
                 this.moveState.pitchUp = 1;
                 break;

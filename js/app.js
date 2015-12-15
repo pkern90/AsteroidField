@@ -1,3 +1,5 @@
+var game = {};
+
 (function () {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -19,8 +21,8 @@
         var canvasRatio = canvasWidth / canvasHeight;
         // CAMERA
 
-        camera = new THREE.PerspectiveCamera(45, canvasRatio, 1, 80000);
-        camera.position.set(0, 10, 50);
+        camera = new THREE.PerspectiveCamera(45, canvasRatio, 1, 5000);
+        camera.position.set(0, 0, 0);
         camera.lookAt(0, 0, 0);
         // LIGHTS
 
@@ -32,7 +34,7 @@
         // RENDERER
         renderer = new THREE.WebGLRenderer({antialias: true});
         renderer.setSize(canvasWidth, canvasHeight);
-        renderer.setClearColor(0x111111, 1.0);
+        renderer.setClearColor(0x000000, 1.0);
 
         var container = document.getElementById('container');
         container.appendChild(renderer.domElement);
@@ -40,24 +42,25 @@
         renderer.gammaInput = true;
         renderer.gammaOutput = true;
 
+        game.mainCamera = camera;
     }
 
     function fillScene() {
         scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x111111, 0.0005);
+        scene.fog = new THREE.Fog(0x000000, 1, 5000);
         scene.add(camera);
 
         // LIGHTS
         scene.add(ambientLight);
         scene.add(light);
 
-        var meteorAmount = 75;
+        var meteorAmount = 700;
         for (var i = 0; i < meteorAmount; i++) {
-            var meteor = Meteor.CreateRandom(70, 0.7, 1.3);
+            var meteor = Meteor.CreateRandom(200, 0.7, 1.3);
 
-            var rndXPosition = Math.random() * 1000 - 500;
-            var rndYPosition = Math.random() * 500 - 250;
-            var rndZPosition = -Math.floor(Math.random() * (6000 - 3000)) - 3000;
+            var rndXPosition = Math.random() * 6000 - 3000;
+            var rndYPosition = Math.random() * 6000 - 3000;
+            var rndZPosition = Math.random() * 6000 - 3000;
             meteor.translateZ(rndZPosition);
             meteor.translateX(rndXPosition);
             meteor.translateY(rndYPosition);
@@ -75,13 +78,10 @@
         scene.add(xeon);
     }
 
-    function updateMeteors() {
+    function updateMeteors(delta) {
         for (var i = 0; i < meteors.length; i++) {
             var meteor = meteors[i];
-            if (meteor.position.z > spaceShip.position.z) {
-                var rndZPosition = -Math.floor(Math.random() * (6000 - 3000)) - 3000;
-                meteor.translateZ(rndZPosition);
-            }
+            meteor.update(spaceShip, delta);
         }
     }
 
@@ -101,12 +101,20 @@
 
     }
 
+    function updateCamera(delta) {
+        camera.position.x = spaceShip.position.x;
+        camera.position.y = spaceShip.position.y + 10;
+        camera.position.z = spaceShip.position.z + 100;
+
+        camera.lookAt(spaceShip.position);
+    }
+
     function render() {
         var delta = clock.getDelta();
 
         if (fixedUpdateTrigger + delta > 0.5) {
             fixedUpdateTrigger = fixedUpdateTrigger + delta - 1;
-            fixedUpdate();
+            fixedUpdate(delta);
         }
         else {
             fixedUpdateTrigger += delta;
@@ -116,21 +124,16 @@
         controller.update(delta);
         spaceShip.update(meteors, delta);
 
-        camera.position.x = spaceShip.position.x;
-        camera.position.y = spaceShip.position.y + 10;
-        camera.position.z = spaceShip.position.z + 50;
+        updateCamera(delta);
 
-        camera.lookAt(spaceShip.position);
-
-        xeon.update(delta);
+        xeon.update(spaceShip, delta);
 
         renderer.render(scene, camera);
     }
 
     var fixedUpdateTrigger = 0;
 
-    function fixedUpdate() {
-
+    function fixedUpdate(delta) {
     }
 
     try {

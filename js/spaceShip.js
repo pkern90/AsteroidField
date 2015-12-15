@@ -108,6 +108,7 @@ SpaceShip.prototype.update = function (collidableObjectList, delta) {
 
                 var ray = new THREE.Raycaster(collider.position, directionVector.clone().normalize());
                 var collisionResults = ray.intersectObjects(collidableMeshList);
+
                 if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
                     object.alive = false;
                     return;
@@ -131,14 +132,14 @@ SpaceShip.prototype.update = function (collidableObjectList, delta) {
             }
 
 
-            var explotionVector = mesh.explodingDirection.clone().multiplyScalar (movementSpeed * delta);
-            mesh.translateX(explotionVector.x);
-            mesh.translateY(explotionVector.y);
-            mesh.translateZ(explotionVector.z);
+            var explosionVector = mesh.explodingDirection.clone().multiplyScalar (movementSpeed * delta);
+            mesh.translateX(explosionVector.x);
+            mesh.translateY(explosionVector.y);
+            mesh.translateZ(explosionVector.z);
 
             mesh.rotation.x += rotationSpeed * delta;
             mesh.rotation.z += rotationSpeed * delta;
             mesh.rotation.y += rotationSpeed * delta;
         }
     }
-}
+};

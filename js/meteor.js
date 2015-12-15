@@ -2,7 +2,8 @@ var Meteor = function (radius, type) {
     THREE.Object3D.call(this);
     createMeteorMesh(this);
     //public
-
+    this.movementSpeed = Math.random() * 1000;
+    this.rotationSpeed = Math.random() * 45;
 
     //internal
     function createMeteorMesh(object) {
@@ -38,6 +39,31 @@ var Meteor = function (radius, type) {
 Meteor.prototype = Object.create(THREE.Object3D.prototype);
 Meteor.prototype.constructor = Meteor;
 
+Meteor.prototype.update = function (spaceShip, delta) {
+
+    moveMeteor(this);
+
+    var maxDist = 6000.0;
+
+
+    var distToSpaceShip = this.position.distanceTo (spaceShip.position);
+    if (distToSpaceShip > maxDist) {
+        replaceMeteor(this);
+    }
+
+    function moveMeteor(object) {
+        object.translateZ(object.movementSpeed * delta);
+        object.rotation.z += object.rotationSpeed * delta * Math.PI / 180;
+    }
+
+    function replaceMeteor(object) {
+        var spaceShipMeteorVector = (new THREE.Vector3()).subVectors(spaceShip.position, object.position);
+
+        var newMeteorPosition = (new THREE.Vector3()).addVectors(spaceShipMeteorVector, spaceShip.position);
+        object.position.set(newMeteorPosition.x, newMeteorPosition.y, newMeteorPosition.z);
+    }
+};
+
 //factory for creating random meteors.
 Meteor.CreateRandom = function (radius, minScale, maxScale) {
     var rndType = Math.floor(Math.random() * 3);
@@ -57,4 +83,4 @@ Meteor.CreateRandom = function (radius, minScale, maxScale) {
     }
 
     return meteor;
-}
+};
