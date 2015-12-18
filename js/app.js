@@ -61,7 +61,7 @@ game.debbug = false;
 
             var rndXPosition = Math.random() * 6000 - 3000;
             var rndYPosition = Math.random() * 6000 - 3000;
-            var rndZPosition = Math.random() * 6000 - 3000;
+            var rndZPosition = Math.random() * 6000;
             asteroid.translateZ(rndZPosition);
             asteroid.translateX(rndXPosition);
             asteroid.translateY(rndYPosition);
