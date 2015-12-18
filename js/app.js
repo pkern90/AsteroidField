@@ -55,7 +55,7 @@ game.debbug = false;
         scene.add(ambientLight);
         scene.add(light);
 
-        var asteroidAmount = 700;
+        var asteroidAmount = 1000;
         for (var i = 0; i < asteroidAmount; i++) {
             var asteroid = Asteroid.CreateRandom(200, 0.7, 1.3);
 
