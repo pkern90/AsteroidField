@@ -102,7 +102,7 @@ game.debbug = false;
 
     }
 
-    function updateCamera(delta) {
+    function updateCamera() {
         camera.position.x = spaceShip.position.x;
         camera.position.y = spaceShip.position.y + 10;
         camera.position.z = spaceShip.position.z + 100;
@@ -115,11 +115,8 @@ game.debbug = false;
 
         updateAsteroids(delta);
         controller.update(delta);
-        spaceShip.__dirtyRotation = true;
-        spaceShip.__dirtyPosition = true;
 
         spaceShip.update(delta);
-
         updateCamera(delta);
 
         xeon.update(spaceShip, delta);
