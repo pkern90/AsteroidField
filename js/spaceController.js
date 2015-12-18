@@ -29,6 +29,10 @@ THREE.SpaceController = function (object) {
                 this.movementSpeedMultiplier = .3;
                 break;
 
+            case 32: /* space */
+                this.movementSpeedMultiplier = 2;
+                break;
+
             case 87: /*W*/
                 this.moveState.pitchDown = 1;
                 break;
@@ -47,6 +51,7 @@ THREE.SpaceController = function (object) {
             case 81: /*Q*/
                 this.moveState.yawLeft = 1;
                 break;
+
             case 69: /*E*/
                 this.moveState.yawRight = 1;
                 break;
@@ -63,6 +68,10 @@ THREE.SpaceController = function (object) {
         switch (event.keyCode) {
 
             case 16: /* shift */
+                this.movementSpeedMultiplier = 1;
+                break;
+
+            case 32: /* space */
                 this.movementSpeedMultiplier = 1;
                 break;
 

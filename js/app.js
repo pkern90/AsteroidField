@@ -1,4 +1,5 @@
 var game = {};
+game.debbug = false;
 
 (function () {
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,7 +11,7 @@ var game = {};
     var camera, scene, renderer;
     var clock = new THREE.Clock();
     var ambientLight, light;
-    var meteors = [];
+    var asteroids = [];
     var spaceShip;
     var xeon;
 
@@ -54,19 +55,19 @@ var game = {};
         scene.add(ambientLight);
         scene.add(light);
 
-        var meteorAmount = 700;
-        for (var i = 0; i < meteorAmount; i++) {
-            var meteor = Meteor.CreateRandom(200, 0.7, 1.3);
+        var asteroidAmount = 700;
+        for (var i = 0; i < asteroidAmount; i++) {
+            var asteroid = Asteroid.CreateRandom(200, 0.7, 1.3);
 
             var rndXPosition = Math.random() * 6000 - 3000;
             var rndYPosition = Math.random() * 6000 - 3000;
             var rndZPosition = Math.random() * 6000 - 3000;
-            meteor.translateZ(rndZPosition);
-            meteor.translateX(rndXPosition);
-            meteor.translateY(rndYPosition);
+            asteroid.translateZ(rndZPosition);
+            asteroid.translateX(rndXPosition);
+            asteroid.translateY(rndYPosition);
 
-            meteors[i] = meteor;
-            scene.add(meteors[i]);
+            asteroids[i] = asteroid;
+            scene.add(asteroids[i]);
         }
 
         spaceShip = new SpaceShip();
@@ -78,10 +79,10 @@ var game = {};
         scene.add(xeon);
     }
 
-    function updateMeteors(delta) {
-        for (var i = 0; i < meteors.length; i++) {
-            var meteor = meteors[i];
-            meteor.update(spaceShip, delta);
+    function updateAsteroids(delta) {
+        for (var i = 0; i < asteroids.length; i++) {
+            var asteroid = asteroids[i];
+            asteroid.update(spaceShip, delta);
         }
     }
 
@@ -112,28 +113,19 @@ var game = {};
     function render() {
         var delta = clock.getDelta();
 
-        if (fixedUpdateTrigger + delta > 0.5) {
-            fixedUpdateTrigger = fixedUpdateTrigger + delta - 1;
-            fixedUpdate(delta);
-        }
-        else {
-            fixedUpdateTrigger += delta;
-        }
-
-        updateMeteors(delta);
+        updateAsteroids(delta);
         controller.update(delta);
-        spaceShip.update(meteors, delta);
+        spaceShip.__dirtyRotation = true;
+        spaceShip.__dirtyPosition = true;
+
+        spaceShip.update(delta);
 
         updateCamera(delta);
 
         xeon.update(spaceShip, delta);
 
+        spaceShip.detectCollision(asteroids);
         renderer.render(scene, camera);
-    }
-
-    var fixedUpdateTrigger = 0;
-
-    function fixedUpdate(delta) {
     }
 
     try {

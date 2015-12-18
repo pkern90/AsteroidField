@@ -3,7 +3,7 @@ var SpaceShip = function () {
 
     //public
     this.alive = true;
-    this.colliders = [];
+    this.collider = '';
 
     //init
     createSpaceShipObject(this);
@@ -73,48 +73,28 @@ var SpaceShip = function () {
             opacity: 0
         });
         var geometry = new THREE.BoxGeometry(26, 4, 8);
+        geometry.computeBoundingBox();
         var collisionBox = new THREE.Mesh(geometry, material);
 
         object.add(collisionBox);
-        object.colliders.push(collisionBox);
+        object.collider = collisionBox;
+
+        if (game.debbug) {
+            var bbox = new THREE.BoundingBoxHelper(collisionBox, 0xff0000);
+            bbox.update();
+            object.add(bbox);
+        }
     }
+
 };
 
 SpaceShip.prototype = Object.create(THREE.Object3D.prototype);
 SpaceShip.prototype.constructor = SpaceShip;
 
-SpaceShip.prototype.update = function (collidableObjectList, delta) {
+SpaceShip.prototype.update = function (delta) {
 
-    if (this.alive) {
-        detectCollision(this);
-    }
-    else {
+    if (!this.alive) {
         explode(this);
-    }
-
-    function detectCollision(object) {
-        var collidableMeshList = [];
-        for (var meshIndex = 0; meshIndex < collidableObjectList.length; meshIndex++) {
-            collidableMeshList[meshIndex] = collidableObjectList[meshIndex].children[0];
-        }
-
-        for (var colliderIndex = 0; colliderIndex < object.colliders.length; colliderIndex++) {
-            var collider = object.colliders[0];
-
-            for (var vertexIndex = 0; vertexIndex < collider.geometry.vertices.length; vertexIndex++) {
-                var localVertex = collider.geometry.vertices[vertexIndex].clone();
-                var globalVertex = localVertex.applyMatrix4(collider.matrixWorld);
-                var directionVector = globalVertex.sub(collider.position);
-
-                var ray = new THREE.Raycaster(collider.position, directionVector.clone().normalize());
-                var collisionResults = ray.intersectObjects(collidableMeshList);
-
-                if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
-                    object.alive = false;
-                    return;
-                }
-            }
-        }
     }
 
     function explode(object) {
@@ -143,3 +123,44 @@ SpaceShip.prototype.update = function (collidableObjectList, delta) {
         }
     }
 };
+
+SpaceShip.prototype.detectCollision = function (collidableObjectList) {
+    if (this.alive) {
+        detectCollision(this);
+    }
+
+    //Not perfect but works for now
+    function detectCollision(object) {
+
+        var collider = object.collider;
+        var boundingBox = collider.geometry.boundingBox;
+
+        for (var meshIndex = 0; meshIndex < collidableObjectList.length; meshIndex++) {
+            var otherObject = collidableObjectList[meshIndex];
+            var otherCollider = otherObject.children[0];
+            var otherBoundingSphere = otherCollider.geometry.boundingSphere;
+
+            //Check if any of the space ship collider Vertices is inside the bounding sphere
+            //of the other object. If so their is a intersection.
+            for (var vertexIndex = 0; vertexIndex < collider.geometry.vertices.length; vertexIndex++) {
+                var localVertex = collider.geometry.vertices[vertexIndex].clone();
+                var globalVertex = localVertex.applyMatrix4(collider.matrixWorld);
+                var sphereVertexDist = globalVertex.sub(otherObject.position).length();
+
+                //Intersecting
+                if (sphereVertexDist < otherBoundingSphere.radius) {
+                    object.alive = false;
+                    return true;
+                }
+            }
+
+            //Intersecting
+            if (boundingBox.containsPoint(otherObject.position)) {
+                object.alive = false;
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
